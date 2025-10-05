@@ -1,13 +1,14 @@
-import './styles/Login.css';
+import './styles/Register.css';
 import { BsChatLeftText } from "react-icons/bs";
 import { CiLock } from "react-icons/ci";
 import { CiUser } from "react-icons/ci";
+import { CiMail } from "react-icons/ci";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { useState } from 'react';
 
-const Login = () => {
+const Register = () => {
     const [showPassword, setShowPassword] = useState(false);
-    const [rememberMe, setRememberMe] = useState(false);
+    const [acceptTerm, setAcceptTerm] = useState(false);
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -18,19 +19,25 @@ const Login = () => {
     // };
 
     return (
-        <div className="login-page">
+        <div className="register-page">
             <div className="img-left">
-                <span className="img-title">Where conversations begin...</span>
+                <span className="img-title">Connect - Chat - Share</span>
             </div>
 
             <div className="form-right">
                 <BsChatLeftText className="form-webicon" />
                 <span className="form-webname">Secury</span>
 
-                <p className='form-welcome'>Welcome back!</p>
-                <p className='form-subwelcome'>Access your conversations and connect instantly.</p>
+                <p className='form-welcome'>Create an account</p>
+                <p className='form-subwelcome'>Join your community and keep the conversation going.</p>
 
                 <form className="form-container">
+                    <label className='input-label' htmlFor="email">Email</label>
+                    <div className="input-container">
+                        <CiMail className="input-icon" />
+                        <input type="text" id="email" placeholder="Enter your email" className="form-input" />
+                    </div>
+
                     <label className='input-label' htmlFor="username">Username</label>
                     <div className="input-container">
                         <CiUser className="input-icon" />
@@ -54,24 +61,24 @@ const Login = () => {
                         </div>
                     </div>
 
-                    <div className="remember-me">
+                    <div className="term-check">
                         <input
                             type="checkbox"
-                            id="remember"
-                            checked={rememberMe}
-                            onChange={(e) => setRememberMe(e.target.checked)}
-                            className="remember-checkbox"
+                            id="term"
+                            checked={acceptTerm}
+                            onChange={(e) => setAcceptTerm(e.target.checked)}
+                            className="term-checkbox"
                         />
-                        <label className="remember-label">Remember me</label>
+                        <label className="term-label">I accept the <a href="/">terms and conditions</a></label>
                     </div>
-                    
-                    <button type="submit" className="form-button">Sign in</button>
+
+                    <button type="submit" className="form-button">Sign up</button>
                 </form>
 
-                <p className="signup-prompt">Don't have an account? <a href="/register"><u>Create an account</u></a></p>
+                <p className="signin-prompt">Already have an account? <a href="/"><u>Sign in</u></a></p>
             </div>
         </div>
     );
 }
 
-export default Login;
+export default Register;
