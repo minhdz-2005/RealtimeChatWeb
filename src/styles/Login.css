@@ -73,7 +73,7 @@
 }
 
 .input-field:focus {
-  box-shadow: 0 0 6px rgba(194, 118, 37, 0.3);
+    box-shadow: 0 0 1rem rgba(99, 77, 53, 0.3);
 }
 
 .login-page .input-field::placeholder {
@@ -95,12 +95,24 @@
 .login-page .login-button {
     width: 10rem;
     height: 3rem;
-
+    border: none;
     border-radius: 2rem;
-    background-image: linear-gradient(to right, #C27625, #C579BC);
-    align-self: center;
 
+    background-image: linear-gradient(to right, #C27625, #C579BC);
+    color: white;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+
+    align-self: center;
     margin-bottom: 1rem;
+    cursor: pointer;
+    transition: all 0.4s ease;
+}
+
+.login-page .login-button:hover {
+    filter: brightness(1.15);
+    box-shadow: 0 0 12px rgba(197, 121, 188, 0.5);
+    transform: scale(1.02);
 }
 
 .login-page .divider {
@@ -133,7 +145,7 @@
     justify-content: space-between;
 }
 
-.social-login button {
+.login-page .social-login button {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -168,11 +180,11 @@
 }
 
 .social-login button:hover {
-    transform: scale(1.05);
+    transform: scale(1.02);
     box-shadow: 0 0 10px rgba(197, 121, 188, 0.3);
+    
 }
 
-/* --- Icon trong nút social --- */
-.social-icon {
+.login-page .social-icon {
     font-size: 1.2rem;
 }

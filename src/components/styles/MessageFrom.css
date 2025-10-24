@@ -1,0 +1,29 @@
+.messageFrom {
+    display: flex;
+}
+
+.messageFrom .avatar {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 2rem;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.messageFrom .messageInfo {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+
+    margin-left: 0.8rem;
+}
+
+.messageFrom .from {
+    text-align: start;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.messageFrom .lastActiveTime {
+    text-align: start;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    font-size: small;
+}
