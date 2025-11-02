@@ -4,6 +4,7 @@
     background-color: rgb(228, 228, 228);
     border-radius: 2rem;
     padding: 0.2rem 1rem 0 1rem;
+    color: black;
     
     box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
 }

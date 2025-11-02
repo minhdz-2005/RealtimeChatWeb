@@ -19,11 +19,13 @@
 
 .messageFrom .from {
     text-align: start;
+    color: black;
     text-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 }
 
 .messageFrom .lastActiveTime {
     text-align: start;
+    color: black;
     text-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
     font-size: small;
 }
