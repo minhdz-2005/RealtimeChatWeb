@@ -56,7 +56,6 @@ const Profile = () => {
     }, []);
 
     return (
-        <>
         <div className="profile-page">
             <div className="upper-container">
                 <img src={`${user.coverPhotoUrl}`} alt="" className="cover-photo" />
@@ -124,7 +123,6 @@ const Profile = () => {
                 </div>
             </div>
         </div>
-        </>
     );
 }
 

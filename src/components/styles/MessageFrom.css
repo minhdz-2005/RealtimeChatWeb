@@ -1,31 +1,71 @@
-.messageFrom {
+/* Toàn bộ style MessageFrom chỉ áp dụng khi nằm trong messages-shell */
+.messages-shell .messageFrom-root {
     display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.12s ease, box-shadow 0.12s ease;
 }
 
-.messageFrom .avatar {
-    width: 3.5rem;
-    height: 3.5rem;
-    border-radius: 2rem;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+.messages-shell .messageFrom-root:hover {
+    background: #f3f4f6;
 }
 
-.messageFrom .messageInfo {
+.messages-shell .messageFrom-avatar-wrapper {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+}
+
+.messages-shell .messageFrom-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 999px;
+    object-fit: cover;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+/* Status dot */
+.messages-shell .messageFrom-status-dot {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    border: 2px solid #ffffff;
+}
+
+.messages-shell .messageFrom-status-dot.online {
+    background: #22c55e;
+}
+
+.messages-shell .messageFrom-status-dot.offline {
+    background: #9ca3af;
+}
+
+/* Info */
+.messages-shell .messageFrom-info {
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
-
-    margin-left: 0.8rem;
+    min-width: 0; /* để text ellipsis hoạt động */
 }
 
-.messageFrom .from {
-    text-align: start;
-    color: black;
-    text-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+.messages-shell .messageFrom-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.messageFrom .lastActiveTime {
-    text-align: start;
-    color: black;
-    text-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-    font-size: small;
+.messages-shell .messageFrom-lastActive {
+    font-size: 0.78rem;
+    color: #9ca3af;
 }

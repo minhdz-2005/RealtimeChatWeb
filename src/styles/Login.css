@@ -1,249 +1,298 @@
+/* ===== Global for login page ===== */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
 .login-page {
     width: 100vw;
     height: 100vh;
-    background-color: #fff;
-
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
+    background: #f3f4f6; /* neutral gray */
+    font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #111827;
 }
 
-/* Overlay layer */
-.loading-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.55);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 999;
-    color: white;
-    font-size: 1.2rem;
-    backdrop-filter: blur(3px);
-    animation: fadeIn 0.6s ease forwards;
-    animation-delay: 0.3s;
+/* Optional: nếu bạn dùng class login-bg ở nơi khác */
+.login-bg {
+    background: #f3f4f6;
 }
 
-/* Spinner */
-.spinner {
-    width: 60px;
-    height: 60px;
-    border: 6px solid rgba(255, 255, 255, 0.3);
-    border-top-color: #ffffff;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 1rem;
+/* ===== Card ===== */
+.login-page .login-card {
+    width: 100%;
+    max-width: 420px;
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    padding: 32px 28px 28px;
+    box-sizing: border-box;
+    /* shadow rất nhẹ, có thể bỏ nếu muốn phẳng hoàn toàn */
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
 }
 
-/* Keyframes */
-@keyframes spin {
-    to { transform: rotate(360deg); }
+/* ===== Header ===== */
+.login-page .login-header {
+    text-align: center;
+    margin-bottom: 24px;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+.login-page .login-header .logo {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    margin-bottom: 12px;
 }
 
-@keyframes fadeOut {
-    from { opacity: 1; }
-    to { opacity: 0; }
+.login-page .login-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0;
+    color: #111827;
+    letter-spacing: 0.02em;
 }
 
-/* Làm mờ form khi loading */
-.blurred {
-  opacity: 0.4;
-  pointer-events: none;
-  user-select: none;
-  transition: opacity 0.3s ease;
+.login-page .login-subtitle {
+    margin-top: 6px;
+    margin-bottom: 0;
+    font-size: 0.85rem;
+    color: #6b7280;
 }
 
-.login-page .logo {
-    width: 7rem;
-    margin-bottom: 1.5rem;
-}
-
+/* ===== Form ===== */
 .login-page .login-form {
-    background-color: transparent;
-
     display: flex;
     flex-direction: column;
-    width: 25rem;
+    gap: 16px;
 }
 
 .login-page .input-label {
-    width: fit-content;
-    margin-top: 1rem;
-    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #374151;
+
+    align-self: flex-start;
 }
 
-.input-wrapper {
+.login-page .input-wrapper {
     position: relative;
-    width: 100%;
     display: flex;
     align-items: center;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    padding: 0 10px;
+    background: #f9fafb;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
-.input-wrapper .input-icon {
-    position: absolute;
-    left: 1rem;
-    color: #C27625;
-    font-size: 1.3rem;
-    pointer-events: none;
+.login-page .input-wrapper:focus-within {
+    border-color: #2563eb;
+    background: #ffffff;
 }
 
-.input-wrapper .eye-icon {
-    position: absolute;
-    right: 1rem;
-    color: #C579BC;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-
-.input-wrapper .eye-icon:hover {
-  color: #C27625;
+.login-page .input-icon {
+    font-size: 18px;
+    color: #9ca3af;
+    flex-shrink: 0;
 }
 
 .login-page .input-field {
-    width: 100%;
-    height: 3rem;
-    padding: 0 2.5rem;
-    background-color: transparent;
-    color: black;
-
-    border-radius: 2rem;
-    border: 2px solid transparent;
-    background-image: linear-gradient(#fff, #fff),
-                        linear-gradient(to right, #C27625, #C579BC);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
+    border: none;
     outline: none;
-    transition: all 0.3s ease;
-}
-
-.input-field:focus {
-    box-shadow: 0 0 1rem rgba(99, 77, 53, 0.3);
+    background: transparent;
+    flex: 1;
+    padding: 10px 8px;
+    font-size: 0.9rem;
+    color: #111827;
+    font-family: inherit;
 }
 
 .login-page .input-field::placeholder {
-    font-style: italic;
-    font-weight: lighter;
-    font-size: 1rem;
+    color: #9ca3af;
 }
 
-.error-message {
-  color: #ff4444;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
-  text-align: center;
+/* Eye icon */
+.login-page .eye-icon {
+    font-size: 16px;
+    color: #9ca3af;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* ===== Error message ===== */
+.login-page .error-message {
+    margin: 4px 0 0;
+    font-size: 0.8rem;
+    color: #b91c1c;
+}
+
+/* ===== Extra (forgot password) ===== */
+.login-page .login-extra {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 4px;
+    margin-bottom: 4px;
 }
 
 .login-page .forgot-pass {
-    font-size: small;
-    font-style: italic;
-    font-weight: lighter;
-    text-align: right;
-
-    margin-bottom: 1rem;
-    margin-right: 1rem;
-}
-
-.login-page .login-button {
-    width: 10rem;
-    height: 3rem;
-    border: none;
-    border-radius: 2rem;
-
-    background-image: linear-gradient(to right, #C27625, #C579BC);
-    color: white;
+    font-size: 0.78rem;
+    color: #2563eb;
+    text-decoration: none;
     font-weight: 500;
-    letter-spacing: 0.5px;
+}
 
-    align-self: center;
-    margin-bottom: 1rem;
+.login-page .forgot-pass:hover {
+    text-decoration: underline;
+}
+
+/* ===== Login button ===== */
+.login-page .login-button {
+    margin-top: 4px;
+    width: 100%;
+    border: none;
+    border-radius: 999px;
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.4s ease;
+    background: #2563eb;
+    color: #ffffff;
+    font-family: inherit;
+    transition: background-color 0.15s ease, transform 0.05s ease;
 }
 
-.login-page .login-button:hover {
-    filter: brightness(1.15);
-    box-shadow: 0 0 12px rgba(197, 121, 188, 0.5);
-    transform: scale(1.02);
+.login-page .login-button:hover:not(:disabled) {
+    background: #1d4ed8;
 }
 
+.login-page .login-button:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.login-page .login-button:disabled {
+    opacity: 0.7;
+    cursor: default;
+}
+
+/* ===== Divider ===== */
 .login-page .divider {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 22rem;
-
-    margin-bottom: 1rem;
+    gap: 8px;
+    margin: 20px 0 12px;
 }
 
 .login-page .divider .line {
     flex: 1;
     height: 1px;
-    background: linear-gradient(to right, #C27625, #C579BC);
-    opacity: 0.6;
+    background: #e5e7eb;
 }
 
 .login-page .divider .text {
-    margin: 0 1rem;
-    font-size: 0.9rem;
-    color: #666;
-    white-space: nowrap;
+    font-size: 0.75rem;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 500;
 }
 
+/* ===== Social Login ===== */
 .login-page .social-login {
-    width: 22rem;
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    gap: 10px;
 }
 
-.login-page .social-login button {
+.login-page .social-btn {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    font-weight: 500;
+    gap: 6px;
+    padding: 9px 10px;
+    border-radius: 999px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
     cursor: pointer;
-    transition: all 0.3s ease;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #374151;
+    font-family: inherit;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
-.login-page .facebook, .login-page .google {
-    width: 9rem;
-    background-color: transparent;
-    border-radius: 2rem;
-    border: 2px solid transparent;
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
-    background-repeat: no-repeat;
-    outline: none;
+.login-page .social-btn.facebook:hover {
+    background: #8e86ff;
+    color: white;
+    border-color: #9ca3af;
 }
 
-.login-page .facebook {
-    color: #3300ff;
-    background-image: linear-gradient(#fff, #fff),
-                    linear-gradient(to right, #5E23E6, #51F3FF);
-}
-
-.login-page .google {
-    color: #985e1e;
-    background-image: linear-gradient(#fff, #fff),
-                    linear-gradient(to right, #FF7B00, #FF5151);
-
-}
-
-.social-login button:hover {
-    transform: scale(1.02);
-    box-shadow: 0 0 10px rgba(197, 121, 188, 0.3);
-    
+.login-page .social-btn.google:hover {
+    background: #a9ab49;
+    border-color: #9ca3af;
+    color: white;
 }
 
 .login-page .social-icon {
-    font-size: 1.2rem;
+    font-size: 16px;
+}
+
+/* Facebook icon màu nhẹ, vẫn giữ neutral */
+.login-page .social-btn.facebook .social-icon {
+    color: #0800ff;
+}
+
+/* Google: icon có sẵn màu, giữ nguyên */
+
+/* ===== Loading overlay ===== */
+.login-page .loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.18);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    font-family: inherit;
+}
+
+.login-page .loading-overlay p {
+    margin-top: 12px;
+    font-size: 0.85rem;
+    color: #f9fafb;
+}
+
+/* Spinner đơn giản, không animation lố */
+.login-page .spinner {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #2563eb;
+    animation: login-spin 0.7s linear infinite;
+}
+
+@keyframes login-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 480px) {
+    .login-page .login-card {
+        padding: 24px 18px 20px;
+        border-radius: 12px;
+    }
+
+    .login-page .login-title {
+        font-size: 1.2rem;
+    }
+
+    .login-page .login-subtitle {
+        font-size: 0.8rem;
+    }
+
+    .login-page .social-btn span {
+        font-size: 0.75rem;
+    }
 }

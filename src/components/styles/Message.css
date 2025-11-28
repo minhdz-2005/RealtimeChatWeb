@@ -1,10 +1,33 @@
-.message {
-    width: fit-content;
-    height: 2rem;
-    background-color: rgb(228, 228, 228);
-    border-radius: 2rem;
-    padding: 0.2rem 1rem 0 1rem;
-    color: black;
-    
-    box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+/* Bubble tin nhắn trong khu messages-thread */
+.messages-shell .message-bubble {
+    display: inline-block;
+    max-width: 100%;
+    padding: 8px 12px;
+    border-radius: 14px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    box-sizing: border-box;
+}
+
+/* Tin nhắn gửi */
+.messages-shell .message-bubble--send {
+    background: #2563eb;
+    color: #ffffff;
+    border-bottom-right-radius: 4px;
+}
+
+/* Tin nhắn nhận */
+.messages-shell .message-bubble--receive {
+    background: #e5e7eb;
+    color: #111827;
+    border-bottom-left-radius: 4px;
+}
+
+/* Compact dùng khi nhiều bubble liên tiếp của cùng 1 người (nếu sau này bạn dùng) */
+.messages-shell .message-bubble--compact {
+    font-size: 0.85rem;
+    padding-top: 6px;
+    padding-bottom: 6px;
 }

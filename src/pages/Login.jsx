@@ -39,12 +39,10 @@ const Login = () => {
                 throw new Error(data.message || 'Login failed');
             }
 
-            // Lưu token và thông tin user vào localStorage
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
 
-            // Chuyển hướng sang trang messages
-            navigate('/messages');
+            navigate('/');
         } catch (err) {
             setError(err.message);
         } finally {
@@ -54,81 +52,103 @@ const Login = () => {
 
     return (
         <>
-            <div className="login-page">
+            <div className="login-page login-bg">
                 {/* Overlay loading layer */}
                 {loading && (
                     <div className="loading-overlay">
                         <div className="spinner"></div>
-                        <p>Logging in...</p>
+                        <p>Signing you in...</p>
                     </div>
                 )}
-                
-                <img src="../src/assets/images/logo-light.png" alt="logo" className="logo" />
 
-                <form onSubmit={handleSubmit} className="login-form">
-                    <label htmlFor="username" className="input-label">Username</label>
-                    <div className="input-wrapper">
-                        <CiUser className="input-icon" />
-                        <input 
-                            type="text" 
-                            id="username" 
-                            className="input-field" 
-                            placeholder="Enter your username" 
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            required
+                <div className="login-card">
+                    <div className="login-header">
+                        <img
+                            src="../src/assets/images/ChatWebLogo.png"
+                            alt="logo"
+                            className="logo"
                         />
+                        <h1 className="login-title">Welcome back</h1>
+                        <p className="login-subtitle">
+                            Log in to continue chatting in real-time.
+                        </p>
                     </div>
 
-                    <label htmlFor="password" className="input-label">Password</label>
-                    <div className="input-wrapper">
-                        <CiLock className="input-icon" />
-                        <input 
-                            type={showPassword ? "text" : "password"} 
-                            id="password" 
-                            className="input-field" 
-                            placeholder="Enter your password" 
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
+                    <form onSubmit={handleSubmit} className="login-form">
+                        <label htmlFor="username" className="input-label">Username</label>
+                        <div className="input-wrapper">
+                            <CiUser className="input-icon" />
+                            <input
+                                type="text"
+                                id="username"
+                                className="input-field"
+                                placeholder="Enter your username"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                required
                             />
-                        {showPassword ? (
-                            <FaRegEye className="eye-icon" onClick={togglePasswordVisibility} />
-                        ) : (
-                            <FaRegEyeSlash className="eye-icon" onClick={togglePasswordVisibility} />
-                        )}
+                        </div>
+
+                        <label htmlFor="password" className="input-label">Password</label>
+                        <div className="input-wrapper">
+                            <CiLock className="input-icon" />
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                id="password"
+                                className="input-field"
+                                placeholder="Enter your password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                            {showPassword ? (
+                                <FaRegEye
+                                    className="eye-icon"
+                                    onClick={togglePasswordVisibility}
+                                />
+                            ) : (
+                                <FaRegEyeSlash
+                                    className="eye-icon"
+                                    onClick={togglePasswordVisibility}
+                                />
+                            )}
+                        </div>
+
+                        {error && <p className="error-message">{error}</p>}
+
+                        <div className="login-extra">
+                            <a href="#" className="forgot-pass">Forgot my password</a>
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="login-button"
+                            disabled={loading}
+                        >
+                            {loading ? 'Logging in...' : 'Login'}
+                        </button>
+                    </form>
+
+                    <div className="divider">
+                        <span className="line"></span>
+                        <span className="text">Or continue with</span>
+                        <span className="line"></span>
                     </div>
 
-                    {error && <p className="error-message">{error}</p>}
-
-                    <a href="#" className="forgot-pass">Forgot my password</a>
-
-                    <button 
-                        type="submit" 
-                        className="login-button"
-                        disabled={loading}
-                    >{loading ? 'Logging in...' : 'Login'}</button>
-                </form>
-
-                <div className="divider">
-                    <span className="line"></span>
-                    <span className="text">Or continue with</span>
-                    <span className="line"></span>
-                </div>
-
-                <div className="social-login">
-                    <button className="facebook">
-                        <FaFacebook className="social-icon" />
-                        Facebook
-                    </button>
-                    <button className="google">
-                        <FcGoogle className="social-icon" />
-                        Google
-                    </button>
+                    <div className="social-login">
+                        <button type="button" className="social-btn facebook">
+                            <FaFacebook className="social-icon" />
+                            <span>Facebook</span>
+                        </button>
+                        <button type="button" className="social-btn google">
+                            <FcGoogle className="social-icon" />
+                            <span>Google</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </>
     );
-}
+};
 
 export default Login;

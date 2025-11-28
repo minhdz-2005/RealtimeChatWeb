@@ -1,18 +1,41 @@
 import "./styles/MessageFrom.css";
 
 const MessageFrom = (props) => {
+    const { avatar, from, lastActive, status } = props;
+
+    const renderLastActive = () => {
+        if (status === "online" || lastActive === 0) return "Online";
+        if (lastActive === 1) return "1 minute ago";
+        return `${lastActive} minutes ago`;
+    };
 
     return (
         <>
-            <div className="messageFrom">
-                <img src={props.avatar} alt="avatar" className="avatar" />
-                <div className="messageInfo">
-                    <span className="from">{props.from}</span>
-                    <span className="lastActiveTime">{props.lastActive === 1 ? "1 minute ago" : `${props.lastActive} minutes ago`}</span>
+            <div className="messageFrom-root">
+                <div className="messageFrom-avatar-wrapper">
+                    <img
+                        src={avatar}
+                        alt={`${from} avatar`}
+                        className="messageFrom-avatar"
+                    />
+                    <span
+                        className={`messageFrom-status-dot ${
+                            status === "online" || lastActive === 0
+                                ? "online"
+                                : "offline"
+                        }`}
+                    ></span>
+                </div>
+
+                <div className="messageFrom-info">
+                    <span className="messageFrom-name">{from}</span>
+                    <span className="messageFrom-lastActive">
+                        {renderLastActive()}
+                    </span>
                 </div>
             </div>
         </>
-    )
-}
+    );
+};
 
 export default MessageFrom;
