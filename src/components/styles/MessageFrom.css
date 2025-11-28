@@ -4,7 +4,7 @@
     align-items: center;
     gap: 10px;
     padding: 8px 10px;
-    border-radius: 12px;
+    border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.12s ease, box-shadow 0.12s ease;
 }
@@ -63,6 +63,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    align-self: flex-start;
 }
 
 .messages-shell .messageFrom-lastActive {

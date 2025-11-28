@@ -12,8 +12,6 @@ import { PiPaperPlaneTilt, PiGif } from "react-icons/pi";
 import { LuUserCog } from "react-icons/lu";
 
 const Messages = () => {
-    const storedUser = localStorage.getItem("user");
-    console.log(storedUser);
 
     // data test
     const user = {
@@ -22,10 +20,10 @@ const Messages = () => {
         avatar: "../src/assets/images/logo-light.png"
     };
 
-    const message = {
-        content: "minh dep trai",
-        status: 'Received',
-    };
+    // const message = {
+    //     content: "minh dep trai",
+    //     status: 'Received',
+    // };
 
     // EFFECT FIELD
 
@@ -33,6 +31,7 @@ const Messages = () => {
     const menuRef = useRef(null);
     const navigate = useNavigate();
     const [showFormNewConv, setShowFormNewConv] = useState(false);
+    const [messageInput, setMessageInput] = useState("");
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -49,8 +48,49 @@ const Messages = () => {
     
     // LOGIC FIELD
     const [conversations, setConversations] = useState([]);
-
+    const [selectedConversation, setSelectedConversation] = useState(null);
+    const [messages, setMessages] = useState([]);
     const currentUser = JSON.parse(localStorage.getItem("user"));
+
+    // console.log("selectedConversation: ", selectedConversation);
+
+    // FETCH MESSAGES WHEN SELECT CONVERSATION
+    useEffect(() => {
+        const fetchMessages = async () => {
+            if (!selectedConversation) return;
+            try {
+                const token = localStorage.getItem("token");
+                if(!token) {
+                    return;
+                }
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/message/${selectedConversation._id}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    }
+                });
+
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.message || "Failed to fetch messages");
+                }
+
+                const data = await res.json();
+                setMessages(data || []);
+
+            } catch (err) {
+                console.error("Error to fetch messages", err);
+            }
+        };
+
+        fetchMessages();
+    }, [selectedConversation]);
+
+    //console.log("messages: ", currentUser);
+    
+
+    
 
 
     // FETCH CONVERSATION
@@ -76,7 +116,7 @@ const Messages = () => {
                 }
 
                 const data = await res.json();
-                console.log("data conv", data);
+                // console.log("data conv", data);
                 setConversations(data || []);
 
             } catch (err) {
@@ -102,7 +142,42 @@ const Messages = () => {
         return others[0] || conversation.participants?.[0] || null;
     };
 
-    
+
+    // SEND MESSAGE LOGIC
+    const sendMessage = async (conversationId, content) => {
+        try {
+            const token = localStorage.getItem("token");
+            if(!token) {
+                return;
+            }
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/message`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    conversationId,
+                    sender: currentUser.id,
+                    content,
+                }),
+            });
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.message || "Failed to send message");
+            }
+
+            const data = await res.json();
+            // console.log("Sent message data: ", data.data);
+            setMessages((prevMessages) => [...prevMessages, data.data]);
+            setMessageInput("");
+
+        } catch (err) {
+            console.error("Error to send message", err);
+        }
+    };
+
     const handleLogout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
@@ -204,11 +279,11 @@ const Messages = () => {
                     </div>
 
                     <div className="messages-conversations">
-                        <MessageFrom
+                        {/* <MessageFrom
                             from={user.name}
                             lastActive={user.lastActive}
                             avatar={user.avatar}
-                        />
+                        /> */}
                         {/* Sau này map list conversations ở đây */}
                         {!conversations.length === 0 && (
                             <span>No conversation yet.</span>
@@ -225,6 +300,7 @@ const Messages = () => {
                                         from={other?.username || "Ngu"}
                                         lastActive={user.lastActive}
                                         avatar={user.avatar}
+                                        onClick={() => setSelectedConversation(conv)}
                                     />
                                 )
                             })
@@ -236,39 +312,59 @@ const Messages = () => {
                 <div className="messages-main">
                     <div className="messages-main-header">
                         <div className="messages-main-user">
-                            <MessageFrom
-                                from={user.name}
-                                lastActive={user.lastActive}
-                                avatar={user.avatar}
-                            />
+                            {selectedConversation ? (
+                                <MessageFrom
+                                    from={getOtherParticipant(selectedConversation)?.username || "Select a conversation"}
+                                    lastActive={user.lastActive}
+                                    avatar={user.avatar}
+                                />
+                            ) : (
+                                <span>Select a conversation</span>
+                            )}
                         </div>
-                        <CiMenuKebab className='messages-main-menu-icon' />
+                        {selectedConversation ? <CiMenuKebab className='messages-main-menu-icon' /> : null}
                     </div>
 
                     <div className="messages-top-divider"></div>
 
                     <div className="messages-thread">
-                        <div className="messages-receive">
-                            <img
-                                src="../src/assets/images/logo-light.png"
-                                alt="avatar"
-                                className="messages-message-avatar"
-                            />
-                            <Message status='receive' message="minh dep trai" />
-                        </div>
+                        {messages.length === 0 && (
+                            <span className="messages-no-message">No messages yet.</span>
+                        )}
+                        {messages && messages.map((msg, index) => {
+                            const prevMsg = index > 0 ? messages[index - 1] : null;
+                            const currentMsg = messages[index];
+                            const nextMsg = index < messages.length ? messages[index + 1] : null;
+                            let pos = false;
 
-                        <div className="messages-send">
-                            <Message status='send' message={message.content} />
-                            <div className="messages-status-wrapper">
-                                {message.status === 'Received' && (
-                                    <IoCheckmarkOutline className='messages-check-icon' />
-                                )}
-                                {message.status === 'Read' && (
-                                    <IoCheckmarkDoneOutline className='messages-check-icon' />
-                                )}
-                                <span className="messages-status-text">{message.status}</span>
-                            </div>
-                        </div>
+                            const isSameSenderAsPrev = prevMsg && prevMsg.sender._id === currentMsg.sender._id;
+                            const isSameSenderAsNext = nextMsg && nextMsg.sender._id === currentMsg.sender._id;
+                            
+                            // console.log('currentMsg: ', currentMsg);
+
+                            if (currentMsg) {
+                                if (isSameSenderAsNext && isSameSenderAsPrev) {
+                                    pos = 'mid';
+                                }
+                                else if (!isSameSenderAsPrev && isSameSenderAsNext) {
+                                    pos = 'first';
+                                }
+                                else if (!isSameSenderAsNext && isSameSenderAsPrev) {
+                                    pos = 'last';
+                                }
+                                else if (!isSameSenderAsNext && !isSameSenderAsPrev) {
+                                    pos = 'none';
+                                }
+                            }
+                            return (
+                                <Message 
+                                    pos={pos} 
+                                    className={msg.sender._id === currentUser.id ? 'send' : 'receive'} 
+                                    status={msg.sender._id === currentUser.id ? 'send' : 'receive'} 
+                                    message={msg.content} key={msg._id} 
+                                />
+                            )
+                        })}
                     </div>
 
                     <div className="messages-input-wrapper">
@@ -280,12 +376,14 @@ const Messages = () => {
                         </div>
 
                         <input
+                            value={messageInput}
+                            onChange={(e) => setMessageInput(e.target.value)}
                             type="text"
                             className="messages-input-message"
                             placeholder='Say something...'
                         />
 
-                        <button className="messages-send-button">
+                        <button onClick={() => sendMessage(selectedConversation._id, messageInput)} className="messages-send-button">
                             <PiPaperPlaneTilt className='messages-send-icon' />
                         </button>
                     </div>

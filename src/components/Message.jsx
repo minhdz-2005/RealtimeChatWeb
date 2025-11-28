@@ -1,7 +1,7 @@
 import './styles/Message.css';
 
 const Message = (props) => {
-    const { status, message, compact } = props;
+    const { status, message, pos } = props;
 
     const isSend = status === 'send';
 
@@ -10,8 +10,8 @@ const Message = (props) => {
             <span
                 className={
                     `message-bubble 
-                     ${isSend ? 'message-bubble--send' : 'message-bubble--receive'} 
-                     ${compact ? 'message-bubble--compact' : ''}`
+                     ${isSend ? 'send' : 'receive'} 
+                     ${pos}`
                 }
             >
                 {message}

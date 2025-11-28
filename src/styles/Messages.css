@@ -334,7 +334,7 @@
     border-top: 1px solid #e5e7eb;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
     overflow-y: auto;
     max-height: calc(100vh - 160px);
 }
@@ -397,38 +397,38 @@
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 2px;
     background: #f9fafb;
 }
 
-/* Receive / Send containers */
-.messages-shell .messages-receive,
-.messages-shell .messages-send {
-    display: flex;
-    align-items: flex-end;
-    gap: 8px;
-    max-width: 70%;
+/* ===== Scrollbar cho khu vực messages-thread ===== */
+
+/* WebKit (Chrome, Edge, Safari) */
+.messages-shell .messages-thread::-webkit-scrollbar {
+    width: 8px;                 /* mảnh, không chiếm chỗ */
 }
 
-/* Tin nhắn nhận: avatar bên trái */
-.messages-shell .messages-receive {
-    align-self: flex-start;
+.messages-shell .messages-thread::-webkit-scrollbar-track {
+    background: transparent;    /* không tạo khung đậm */
 }
 
-/* Tin nhắn gửi: đẩy sang phải */
-.messages-shell .messages-send {
-    align-self: flex-end;
-    flex-direction: column;
-    justify-content: flex-end;
-}
-
-/* Avatar trong thread */
-.messages-shell .messages-message-avatar {
-    width: 32px;
-    height: 32px;
+.messages-shell .messages-thread::-webkit-scrollbar-thumb {
+    background-color: #d1d5db;  /* xám trung tính */
     border-radius: 999px;
-    object-fit: cover;
+    border: 2px solid transparent; /* tạo cảm giác thanh mảnh hơn */
+    background-clip: content-box;
 }
+
+.messages-shell .messages-thread::-webkit-scrollbar-thumb:hover {
+    background-color: #9ca3af;  /* đậm hơn nhẹ khi hover */
+}
+
+/* Firefox */
+.messages-shell .messages-thread {
+    scrollbar-width: thin;              /* "auto" | "thin" | "none" */
+    scrollbar-color: #d1d5db transparent;
+}
+
 
 /* Status text + icon dưới bubble gửi */
 .messages-shell .messages-status-wrapper {
@@ -478,6 +478,7 @@
     flex: 1;
     border-radius: 999px;
     border: 1px solid #d1d5db;
+    color: black;
     padding: 8px 14px;
     font-size: 0.9rem;
     font-family: inherit;
