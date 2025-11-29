@@ -8,37 +8,38 @@
     word-wrap: break-word;
     white-space: pre-wrap;
     box-sizing: border-box;
+    text-align: left;
 }
 
 /* Tin nhắn gửi */
 .messages-shell .send {
     background: #2563eb;
     color: #ffffff;
-    border-radius: 2rem 5px 5px 2rem;
+    border-radius: 20px 5px 5px 20px;
     align-self: flex-end;
 }
 
 /* Tin nhắn nhận */
 .messages-shell .receive {
     background: #e5e7eb;
-    border-radius: 5px 2rem 2rem 5px;
+    border-radius: 5px 20px 20px 5px;
     color: #111827;
 }
 
 .messages-shell .receive.first {
-    border-radius: 2rem 2rem 2rem 5px;
+    border-radius: 20px 20px 20px 5px;
 }
 .messages-shell .receive.last {
-    border-radius: 5px 2rem 2rem 2rem;
+    border-radius: 5px 20px 20px 20px;
 }
 
 .messages-shell .send.first {
-    border-radius: 2rem 2rem 10px 2rem;
+    border-radius: 20px 20px 10px 20px;
 }
 .messages-shell .send.last {
-    border-radius: 2rem 5px 2rem 2rem;
+    border-radius: 20px 5px 20px 20px;
 }
 
 .messages-shell .none {
-    border-radius: 2rem;
+    border-radius: 20px;
 }

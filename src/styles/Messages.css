@@ -456,6 +456,8 @@
     align-items: center;
     gap: 10px;
     background: #ffffff;
+    position: relative;
+    overflow: hidden;
 }
 
 .messages-shell .messages-input-tools {
@@ -476,7 +478,8 @@
 
 .messages-shell .messages-input-message {
     flex: 1;
-    border-radius: 999px;
+    resize: none;
+    border-radius: 20px;
     border: 1px solid #d1d5db;
     color: black;
     padding: 8px 14px;
@@ -484,6 +487,13 @@
     font-family: inherit;
     outline: none;
     background: #f9fafb;
+    overflow-y: auto;
+    max-height: 80px;
+    box-sizing: border-box;
+
+    
+    scrollbar-width: none; /* Ẩn scrollbar mặc định của Firefox */
+    scrollbar-color: #b5bcc8 transparent;
 }
 
 .messages-shell .messages-input-message:focus {
@@ -495,6 +505,27 @@
     color: #9ca3af;
 }
 
+/* Scrollbar cho ô nhập tin nhắn */
+
+
+/* Chrome, Edge, Safari */
+/* .messages-shell .messages-input-message::-webkit-scrollbar {
+  width: 4px;
+}
+
+.messages-shell .messages-input-message::-webkit-scrollbar-track {
+  background: transparent;          
+}
+
+.messages-shell .messages-input-message::-webkit-scrollbar-thumb {
+  background-color: #b5bcc8;         
+  border-radius: 999px;
+  border: 2px solid transparent;    
+}
+
+.messages-shell .messages-input-message::-webkit-scrollbar-thumb:hover {
+  background-color: #9aa3b3; 
+} */
 /* Send button */
 .messages-shell .messages-send-button {
     border-radius: 999px;

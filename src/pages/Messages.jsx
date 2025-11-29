@@ -3,6 +3,7 @@ import MessageFrom from '../components/MessageFrom';
 import Message from '../components/Message';
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { socket } from '../socket';
 
 import { CiSearch, CiMenuKebab, CiSettings, CiLogout } from 'react-icons/ci';
 import { IoIosClose } from "react-icons/io";
@@ -26,13 +27,13 @@ const Messages = () => {
     // };
 
     // EFFECT FIELD
-
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);
     const navigate = useNavigate();
     const [showFormNewConv, setShowFormNewConv] = useState(false);
     const [messageInput, setMessageInput] = useState("");
 
+    // CLICK OUTSIDE EVENT FOR MENU
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -51,6 +52,26 @@ const Messages = () => {
     const [selectedConversation, setSelectedConversation] = useState(null);
     const [messages, setMessages] = useState([]);
     const currentUser = JSON.parse(localStorage.getItem("user"));
+    const threadRef = useRef(null);
+    const textareaRef = useRef(null);
+
+    // SCROLL TO BOTTOM WHEN NEW MESSAGE ARRIVE
+    useEffect(() => {
+        if (threadRef.current) {
+            threadRef.current.scrollTop = threadRef.current.scrollHeight;
+        }
+    }, [messages]);
+
+    // RESTORE SELECTED CONVERSATION FROM LOCALSTORAGE
+    useEffect(() => {
+        const currentConversationId = localStorage.getItem("currentConversationId");
+        if (currentConversationId) {
+            const conversation = conversations.find(conv => conv._id === currentConversationId);
+            if (conversation) {
+                setSelectedConversation(conversation);
+            }
+        }
+    }, [conversations]);
 
     // console.log("selectedConversation: ", selectedConversation);
 
@@ -58,6 +79,12 @@ const Messages = () => {
     useEffect(() => {
         const fetchMessages = async () => {
             if (!selectedConversation) return;
+
+            localStorage.setItem("currentConversationId", selectedConversation._id);
+
+            // JOIN ROOM SOCKET.IO
+            socket.emit("joinConversation", selectedConversation._id);
+
             try {
                 const token = localStorage.getItem("token");
                 if(!token) {
@@ -89,9 +116,15 @@ const Messages = () => {
 
     //console.log("messages: ", currentUser);
     
-
-    
-
+    // SOCKET.IO SETUP
+    useEffect(() => {
+        if (!socket.connected) {
+            socket.connect();
+        }
+        return () => {
+            socket.disconnect();
+        };
+    }, []);
 
     // FETCH CONVERSATION
     useEffect(() => {
@@ -142,9 +175,32 @@ const Messages = () => {
         return others[0] || conversation.participants?.[0] || null;
     };
 
+    // LISTEN FOR NEW MESSAGES VIA SOCKET.IO
+    useEffect(() => {
+        const handleNewMessage = (newMessage) => {
+            // Kiểm tra nếu message mới thuộc về cuộc trò chuyện hiện tại
+            if (selectedConversation && newMessage.conversationId === selectedConversation._id) {
+                setMessages((prevMessages) => [...prevMessages, newMessage]);
+            }
+        };
+
+        socket.on("newMessage", handleNewMessage);
+
+        return () => {
+            socket.off("newMessage", handleNewMessage);
+        };
+    }, [selectedConversation]);
 
     // SEND MESSAGE LOGIC
     const sendMessage = async (conversationId, content) => {
+        // IF CONTENT IS EMPTY
+        if (!content.trim()) {
+            setMessageInput("");
+            if (textareaRef.current) {
+                textareaRef.current.style.height = 'auto';   // về lại trạng thái 1 dòng
+            }
+            return;
+        }
         try {
             const token = localStorage.getItem("token");
             if(!token) {
@@ -168,19 +224,46 @@ const Messages = () => {
                 throw new Error(errData.message || "Failed to send message");
             }
 
-            const data = await res.json();
+            // const data = await res.json();
             // console.log("Sent message data: ", data.data);
-            setMessages((prevMessages) => [...prevMessages, data.data]);
+            // setMessages((prevMessages) => [...prevMessages, data.data]);
             setMessageInput("");
-
+            if (textareaRef.current) {
+                textareaRef.current.style.height = 'auto';   // về lại trạng thái 1 dòng
+            }
         } catch (err) {
             console.error("Error to send message", err);
         }
     };
 
+    // CLICK ENTER TO SEND MESSAGE
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage(selectedConversation._id, messageInput);
+        }
+    };
+
+    // AUTO GROW TEXTAREA
+    const handleChange = (e) => {
+        setMessageInput(e.target.value);
+
+        // auto grow
+        const el = e.target;
+        
+        el.style.height = 'auto';
+        el.style.height = `${el.scrollHeight}px`;
+
+        if (el.value === '') {
+            el.style.height = 'auto'; // về lại trạng thái 1 dòng
+        }
+    };
+
+    // LOGOUT FUNCTION
     const handleLogout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
+        localStorage.removeItem("currentConversationId");
         navigate("/login");
     };
 
@@ -327,7 +410,7 @@ const Messages = () => {
 
                     <div className="messages-top-divider"></div>
 
-                    <div className="messages-thread">
+                    <div className="messages-thread" ref={threadRef}>
                         {messages.length === 0 && (
                             <span className="messages-no-message">No messages yet.</span>
                         )}
@@ -375,15 +458,21 @@ const Messages = () => {
                             <HiOutlineMicrophone className='messages-message-icon' />
                         </div>
 
-                        <input
+                        <textarea
+                            ref={textareaRef}
                             value={messageInput}
-                            onChange={(e) => setMessageInput(e.target.value)}
+                            onChange={handleChange}
+                            onKeyDown={handleKeyDown}
                             type="text"
                             className="messages-input-message"
                             placeholder='Say something...'
+                            rows={1}
                         />
 
-                        <button onClick={() => sendMessage(selectedConversation._id, messageInput)} className="messages-send-button">
+                        <button 
+                            onClick={() => sendMessage(selectedConversation._id, messageInput)} 
+                            className="messages-send-button"
+                        >
                             <PiPaperPlaneTilt className='messages-send-icon' />
                         </button>
                     </div>
