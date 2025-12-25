@@ -1,7 +1,7 @@
 import '../styles/Messages.css';
 import MessageFrom from '../components/MessageFrom';
 import Message from '../components/Message';
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { socket } from '../socket';
 
@@ -32,6 +32,7 @@ const Messages = () => {
     const navigate = useNavigate();
     const [showFormNewConv, setShowFormNewConv] = useState(false);
     const [messageInput, setMessageInput] = useState("");
+    const [newConvTo, setNewConvTo] = useState("");
 
     // CLICK OUTSIDE EVENT FOR MENU
     useEffect(() => {
@@ -45,8 +46,6 @@ const Messages = () => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    
-    
     // LOGIC FIELD
     const [conversations, setConversations] = useState([]);
     const [selectedConversation, setSelectedConversation] = useState(null);
@@ -54,13 +53,23 @@ const Messages = () => {
     const currentUser = JSON.parse(localStorage.getItem("user"));
     const threadRef = useRef(null);
     const textareaRef = useRef(null);
+    const prevScrollHeightRef = useRef(0);
+    const isPrependRef = useRef(false);
+
 
     // SCROLL TO BOTTOM WHEN NEW MESSAGE ARRIVE
     useEffect(() => {
-        if (threadRef.current) {
+        if (!threadRef.current) return;
+
+        if (!isPrependRef.current) {
+            // chỉ auto-scroll khi message mới
             threadRef.current.scrollTop = threadRef.current.scrollHeight;
+            
         }
+
+        isPrependRef.current = false;
     }, [messages]);
+
 
     // RESTORE SELECTED CONVERSATION FROM LOCALSTORAGE
     useEffect(() => {
@@ -73,49 +82,96 @@ const Messages = () => {
         }
     }, [conversations]);
 
-    // console.log("selectedConversation: ", selectedConversation);
-
     // FETCH MESSAGES WHEN SELECT CONVERSATION
-    useEffect(() => {
-        const fetchMessages = async () => {
-            if (!selectedConversation) return;
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
 
-            localStorage.setItem("currentConversationId", selectedConversation._id);
+    const fetchMessages = async ({ before } = {}) => {
+        if (!selectedConversation || isLoadingMore || !hasMore) return;
 
-            // JOIN ROOM SOCKET.IO
-            socket.emit("joinConversation", selectedConversation._id);
+        setIsLoadingMore(true);
 
-            try {
-                const token = localStorage.getItem("token");
-                if(!token) {
-                    return;
-                }
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/message/${selectedConversation._id}`, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`,
-                    }
-                });
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) return;
 
-                if (!res.ok) {
-                    const errData = await res.json().catch(() => ({}));
-                    throw new Error(errData.message || "Failed to fetch messages");
-                }
+            const url = new URL(
+                `${import.meta.env.VITE_API_URL}/message/${selectedConversation._id}`
+            );
 
-                const data = await res.json();
-                setMessages(data || []);
-
-            } catch (err) {
-                console.error("Error to fetch messages", err);
+            url.searchParams.append("limit", 20);
+            if (before) {
+                url.searchParams.append("before", before);
+                isPrependRef.current = true;
             }
-        };
 
-        fetchMessages();
+            const res = await fetch(url.toString(), {
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                },
+            });
+
+            const data = await res.json();
+
+            if (data.length === 0) {
+                setHasMore(false);
+                return;
+            }
+
+            setMessages(prev =>
+                before ? [...data, ...prev] : data
+            );
+
+        } catch (err) {
+            console.error("Fetch messages error:", err);
+        } finally {
+            setIsLoadingMore(false);
+        }
+    };
+
+    
+    useEffect(() => {
+        if (!selectedConversation) return;
+
+        setMessages([]);
+        setHasMore(true);
+
+        socket.emit("joinConversation", selectedConversation._id);
+
+        fetchMessages(); // load latest
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedConversation]);
 
-    //console.log("messages: ", currentUser);
-    
+    // INFINITE SCROLL TO LOAD MORE MESSAGES
+    const handleScroll = () => {
+        if (!threadRef.current || isLoadingMore || !hasMore) return;
+
+        // Khi scroll lên gần top
+        if (threadRef.current.scrollTop <= 50) {
+            const firstMessage = messages[0];
+            if (firstMessage) {
+                prevScrollHeightRef.current = threadRef.current.scrollHeight;
+                fetchMessages({ before: firstMessage.createdAt });
+            }
+        }
+    };
+
+    // GIỮ NGUYÊN VỊ TRÍ KHI LOAD THÊM TIN NHẮN Ở TRÊN
+    useLayoutEffect(() => {
+        if (!threadRef.current) return;
+        if (prevScrollHeightRef.current === 0) return;
+
+        const newScrollHeight = threadRef.current.scrollHeight;
+        const diff = newScrollHeight - prevScrollHeightRef.current;
+
+        // ✅ GIỮ NGUYÊN VỊ TRÍ ĐANG XEM
+        threadRef.current.scrollTop = diff;
+
+        // reset
+        prevScrollHeightRef.current = 0;
+    }, [messages]);
+
+
     // SOCKET.IO SETUP
     useEffect(() => {
         if (!socket.connected) {
@@ -126,7 +182,7 @@ const Messages = () => {
         };
     }, []);
 
-    // FETCH CONVERSATION
+    // FETCH CONVERSATION OF USER
     useEffect(() => {
         const fetchConversations = async () => {
             try {
@@ -163,8 +219,6 @@ const Messages = () => {
     // GET OTHER FROM CONVERSATION
     const getOtherParticipant = (conversation) => {
         if (!currentUser) return null;
-
-        // console.log("conv p: ", conversation.participants);
 
         // Giả sử backend populate "participants"
         const others = (conversation.participants || []).filter(
@@ -259,6 +313,72 @@ const Messages = () => {
         }
     };
 
+    // CREATE NEW CONVERSATION LOGIC
+    const searchUserToCreateConv = async (username) => {
+        try {
+            const token = localStorage.getItem("token");
+            if(!token) {
+                return;
+            }
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/users/search?username=${username}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                }
+            });
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.message || "Failed to search user");
+            }
+            const data = await res.json();
+            return data;
+        } catch (err) {
+            console.error("Error to search user", err);
+            return null;
+        }
+    }
+
+    const startNewConversation = async (username) => {
+        const user = await searchUserToCreateConv(username);
+        // console.log("user found: ", user.users[0]._id);
+
+        // MAKE IT BETTER UI LATER
+        if (!user) {
+            alert("User not found");
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem("token");
+            if(!token) {
+                return;
+            }
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/conversation`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    participants: [currentUser.id, user.users[0]._id],
+                }),
+            });
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.message || "Failed to create conversation");
+            }
+            const data = await res.json();
+            // console.log("Created conversation: ", data);
+            setConversations(prev => [data, ...prev]);
+            setShowFormNewConv(false);
+            setNewConvTo("");
+            setSelectedConversation(data);
+        } catch (err) {
+            console.error("Error to create conversation", err);
+        }
+    }
+
     // LOGOUT FUNCTION
     const handleLogout = () => {
         localStorage.removeItem("token");
@@ -343,6 +463,8 @@ const Messages = () => {
                                                 type="text"
                                                 className="messages-new-conv-input"
                                                 placeholder="Enter username"
+                                                value={newConvTo}
+                                                onChange={(e) => setNewConvTo(e.target.value)}
                                             />
                                         </div>
 
@@ -350,6 +472,10 @@ const Messages = () => {
                                             <button
                                                 type="submit"
                                                 className="messages-new-conv-btn messages-new-conv-btn--primary"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    startNewConversation(newConvTo);
+                                                }}
                                             >
                                                 Start chat
                                             </button>
@@ -362,13 +488,7 @@ const Messages = () => {
                     </div>
 
                     <div className="messages-conversations">
-                        {/* <MessageFrom
-                            from={user.name}
-                            lastActive={user.lastActive}
-                            avatar={user.avatar}
-                        /> */}
-                        {/* Sau này map list conversations ở đây */}
-                        {!conversations.length === 0 && (
+                        {conversations.length === 0 && (
                             <span>No conversation yet.</span>
                         )}
 
@@ -380,7 +500,7 @@ const Messages = () => {
                                 return (
                                     <MessageFrom 
                                         key={conv._id}
-                                        from={other?.username || "Ngu"}
+                                        from={other?.username || "unknown"}
                                         lastActive={user.lastActive}
                                         avatar={user.avatar}
                                         onClick={() => setSelectedConversation(conv)}
@@ -410,7 +530,7 @@ const Messages = () => {
 
                     <div className="messages-top-divider"></div>
 
-                    <div className="messages-thread" ref={threadRef}>
+                    <div className="messages-thread" ref={threadRef} onScroll={handleScroll}>
                         {messages.length === 0 && (
                             <span className="messages-no-message">No messages yet.</span>
                         )}
