@@ -13,19 +13,6 @@ import { PiPaperPlaneTilt, PiGif } from "react-icons/pi";
 import { LuUserCog } from "react-icons/lu";
 
 const Messages = () => {
-
-    // data test
-    const user = {
-        name: "Minh",
-        lastActive: 5,
-        avatar: "../src/assets/images/logo-light.png"
-    };
-
-    // const message = {
-    //     content: "minh dep trai",
-    //     status: 'Received',
-    // };
-
     // EFFECT FIELD
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);
@@ -55,6 +42,55 @@ const Messages = () => {
     const textareaRef = useRef(null);
     const prevScrollHeightRef = useRef(0);
     const isPrependRef = useRef(false);
+    const [profileMap, setProfileMap] = useState({});
+
+
+    // FECTH CURRENT USER PROFILE
+    const fetchProfile = async (userID) => {
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/profile/${userID}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await res.json();
+            return data;
+        } catch (error) {
+            console.error("Error fetching profile:", error);
+        }
+    };
+
+    useEffect(() => {
+        if (!conversations) return;
+
+        const fetchMissingProfiles = async () => {
+            const newProfiles = {};
+
+            for (const conv of conversations) {
+                const other = getOtherParticipant(conv);
+                if (!other) continue;
+
+                // ❗ đã có thì không fetch lại
+                if (profileMap[other._id]) continue;
+
+                const profile = await fetchProfile(other._id);
+                if (profile) {
+                    newProfiles[other._id] = profile;
+                }
+            }
+
+            if (Object.keys(newProfiles).length > 0) {
+                setProfileMap(prev => ({
+                    ...prev,
+                    ...newProfiles
+                }));
+            }
+        };
+
+        fetchMissingProfiles();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [conversations]);
 
 
     // SCROLL TO BOTTOM WHEN NEW MESSAGE ARRIVE
@@ -341,10 +377,10 @@ const Messages = () => {
 
     const startNewConversation = async (username) => {
         const user = await searchUserToCreateConv(username);
-        // console.log("user found: ", user.users[0]._id);
+        // console.log("user found: ", user.users);
 
         // MAKE IT BETTER UI LATER
-        if (!user) {
+        if (user.users.length === 0) {
             alert("User not found");
             return;
         }
@@ -495,14 +531,14 @@ const Messages = () => {
                         {conversations && (
                             conversations.map((conv) => {
                                 const other = getOtherParticipant(conv);
-                                // console.log("other: ", other);
+                                const otherProfile = other ? profileMap[other._id] : null;
 
                                 return (
                                     <MessageFrom 
                                         key={conv._id}
-                                        from={other?.username || "unknown"}
-                                        lastActive={user.lastActive}
-                                        avatar={user.avatar}
+                                        from={otherProfile?.name || "unknown"}
+                                        lastActive={otherProfile?.lastSeen}
+                                        avatarUrl={otherProfile?.avatarUrl}
                                         onClick={() => setSelectedConversation(conv)}
                                     />
                                 )
@@ -517,9 +553,9 @@ const Messages = () => {
                         <div className="messages-main-user">
                             {selectedConversation ? (
                                 <MessageFrom
-                                    from={getOtherParticipant(selectedConversation)?.username || "Select a conversation"}
-                                    lastActive={user.lastActive}
-                                    avatar={user.avatar}
+                                    from={profileMap[getOtherParticipant(selectedConversation)?._id].name || "Select a conversation"}
+                                    lastActive={profileMap[getOtherParticipant(selectedConversation)?._id].lastSeen}
+                                    avatarUrl={profileMap[getOtherParticipant(selectedConversation)?._id].avatarUrl}
                                 />
                             ) : (
                                 <span>Select a conversation</span>

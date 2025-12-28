@@ -1,7 +1,7 @@
 import "./styles/MessageFrom.css";
 
 const MessageFrom = (props) => {
-    const { avatar, from, lastActive, status, onClick } = props;
+    const { avatarUrl, from, lastActive, status, onClick } = props;
 
     const renderLastActive = () => {
         if (status === "online" || lastActive === 0) return "Online";
@@ -14,7 +14,7 @@ const MessageFrom = (props) => {
             <div className="messageFrom-root" onClick={onClick}>
                 <div className="messageFrom-avatar-wrapper">
                     <img
-                        src={avatar}
+                        src={avatarUrl}
                         alt={`${from} avatar`}
                         className="messageFrom-avatar"
                     />
