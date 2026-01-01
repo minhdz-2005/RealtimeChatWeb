@@ -218,6 +218,13 @@ const Messages = () => {
         };
     }, []);
 
+    // EMIT USER ONLINE STATUS
+    useEffect(() => {
+        if (currentUser) {
+            socket.emit("userOnline", currentUser.id);
+        }
+    }, [currentUser]);
+
     // FETCH CONVERSATION OF USER
     useEffect(() => {
         const fetchConversations = async () => {
@@ -536,9 +543,12 @@ const Messages = () => {
                                 return (
                                     <MessageFrom 
                                         key={conv._id}
-                                        from={otherProfile?.name || "unknown"}
+                                        from={otherProfile?.name || "User Unknown"}
                                         lastActive={otherProfile?.lastSeen}
+                                        status={otherProfile?.status}
                                         avatarUrl={otherProfile?.avatarUrl}
+                                        lastMessage={conv.lastMessage ? conv.lastMessage.content : null}
+                                        isSendByUser={conv.lastMessage ? conv.lastMessage.sender === currentUser.id : false}
                                         onClick={() => setSelectedConversation(conv)}
                                     />
                                 )

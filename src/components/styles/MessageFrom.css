@@ -33,20 +33,20 @@
 /* Status dot */
 .messages-shell .messageFrom-status-dot {
     position: absolute;
-    bottom: 0;
-    right: 0;
+    bottom: -2px;
+    right: -3px;
     width: 10px;
     height: 10px;
     border-radius: 999px;
-    border: 2px solid #ffffff;
 }
 
 .messages-shell .messageFrom-status-dot.online {
+    border: 2px solid #ffffff;
     background: #22c55e;
 }
 
 .messages-shell .messageFrom-status-dot.offline {
-    background: #9ca3af;
+    background: transparent;
 }
 
 /* Info */
@@ -69,5 +69,5 @@
 
 .messages-shell .messageFrom-lastActive {
     font-size: 0.78rem;
-    color: #9ca3af;
+    color: #848992;
 }
