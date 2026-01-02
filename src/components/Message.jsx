@@ -1,9 +1,10 @@
 import './styles/Message.css';
 
 const Message = (props) => {
-    const { status, message, pos } = props;
+    const { isSendByUser, message, pos, status, showStatus } = props;
 
-    const isSend = status === 'send';
+    const isSend = isSendByUser === 'send';
+
 
     return (
         <>
@@ -16,6 +17,13 @@ const Message = (props) => {
             >
                 {message}
             </span>
+            {isSend && showStatus && (
+                <span 
+                    className='status'
+                >
+                    {status}
+                </span>
+            )}
         </>
     );
 };

@@ -178,6 +178,35 @@ const Messages = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedConversation]);
 
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleMessagesSeen = ({ conversationId }) => {
+            // Chỉ xử lý nếu đang mở đúng conversation
+            if (selectedConversation?._id !== conversationId) return;
+
+            setMessages(prev =>
+                prev.map(msg => {
+                    // chỉ update message do mình gửi
+                    if (
+                        msg.sender._id === currentUser.id &&
+                        msg.status === 'sent'
+                    ) {
+                        return { ...msg, status: 'seen' };
+                    }
+                    return msg;
+                })
+            );
+        };
+
+        socket.on('messagesSeen', handleMessagesSeen);
+
+        return () => {
+            socket.off('messagesSeen', handleMessagesSeen);
+        };
+    }, [selectedConversation, currentUser]);
+
+
     // INFINITE SCROLL TO LOAD MORE MESSAGES
     const handleScroll = () => {
         if (!threadRef.current || isLoadingMore || !hasMore) return;
@@ -224,6 +253,22 @@ const Messages = () => {
             socket.emit("userOnline", currentUser.id);
         }
     }, [currentUser]);
+
+    useEffect(() => {
+        socket.on("friendStatus", ({ userId, status, lastSeen }) => {
+            setProfileMap(prev => ({
+                ...prev,
+                [userId]: {
+                    ...prev[userId],
+                    status,
+                    lastSeen
+                }
+            }));
+        });
+
+        return () => socket.off("friendStatus");
+    }, []);
+
 
     // FETCH CONVERSATION OF USER
     useEffect(() => {
@@ -566,6 +611,7 @@ const Messages = () => {
                                     from={profileMap[getOtherParticipant(selectedConversation)?._id].name || "Select a conversation"}
                                     lastActive={profileMap[getOtherParticipant(selectedConversation)?._id].lastSeen}
                                     avatarUrl={profileMap[getOtherParticipant(selectedConversation)?._id].avatarUrl}
+                                    status={profileMap[getOtherParticipant(selectedConversation)?._id].status}
                                 />
                             ) : (
                                 <span>Select a conversation</span>
@@ -584,7 +630,8 @@ const Messages = () => {
                             const prevMsg = index > 0 ? messages[index - 1] : null;
                             const currentMsg = messages[index];
                             const nextMsg = index < messages.length ? messages[index + 1] : null;
-                            let pos = false;
+                            let pos = '';
+                            let isShowStatus = false;
 
                             const isSameSenderAsPrev = prevMsg && prevMsg.sender._id === currentMsg.sender._id;
                             const isSameSenderAsNext = nextMsg && nextMsg.sender._id === currentMsg.sender._id;
@@ -604,13 +651,22 @@ const Messages = () => {
                                 else if (!isSameSenderAsNext && !isSameSenderAsPrev) {
                                     pos = 'none';
                                 }
+
+                                if (nextMsg) {
+                                    if (nextMsg.status !== currentMsg.status || currentMsg.sender._id !== nextMsg.sender._id) {
+                                        isShowStatus = true;
+                                    }
+                                } else {
+                                    isShowStatus = true;
+                                }
                             }
                             return (
                                 <Message 
                                     pos={pos} 
-                                    className={msg.sender._id === currentUser.id ? 'send' : 'receive'} 
-                                    status={msg.sender._id === currentUser.id ? 'send' : 'receive'} 
-                                    message={msg.content} key={msg._id} 
+                                    isSendByUser={msg.sender._id === currentUser.id ? 'send' : 'receive'} 
+                                    message={msg.content} key={msg._id}
+                                    status={msg.status}
+                                    showStatus={isShowStatus}
                                 />
                             )
                         })}
